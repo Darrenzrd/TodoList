@@ -43,6 +43,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     public boolean deleteTasks(int id){
+        log.info("delete id = {}", id);
         return tasks.removeIf(task -> task.getId() == id);
     }
 }
