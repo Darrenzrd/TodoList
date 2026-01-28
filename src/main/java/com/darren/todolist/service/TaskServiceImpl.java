@@ -1,49 +1,51 @@
 package com.darren.todolist.service;
 
 import com.darren.todolist.entity.Task;
+import com.darren.todolist.mapper.TaskMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 @Service
 public class TaskServiceImpl implements TaskService {
-    private final List<Task> tasks = new ArrayList<>();
-    private final AtomicInteger count = new AtomicInteger(1);
+    private final TaskMapper taskMapper;
 
+    public TaskServiceImpl(TaskMapper taskMapper) {
+        this.taskMapper = taskMapper;
+    }
+
+    //id自增原子操作
     @Override
-    public Task addTask(String title) {
+    public Task addTask(String title, Task.TaskStatus status) {
+        if (status == null) status = Task.TaskStatus.Todo;//默认status
         Task task = new Task();
-        task.setId(count.getAndIncrement());
-        task.setTaskStatues(Task.TaskStatus.Todo);
         task.setTitle(title);
-        tasks.add(task);
-        log.info("TaskService添加任务:{},id= {}", task.getClass(),task.getId());
+        task.setTaskStatus(status);
+        task.setCreatetime(LocalDateTime.now());
+        taskMapper.insert(task);
+        log.info("TaskService添加任务:{},id= {}", task.getClass(), task.getId());
         return task;
     }
 
     public List<Task> listTasks() {
         log.info("list all tasks");
-        return tasks;
+        return taskMapper.findAll();
     }
 
-    public boolean updateTaskStatus(int id, Task.TaskStatus status) {
-        for (Task task : tasks) {
-            if (task.getId() == id) {
-                task.setTaskStatues(status);
-                log.info("update id={} status for {}", id, status);
-                return true;
-            }
-        }
-        return false;
+    public boolean updateTaskStatus(Long id, Task.TaskStatus status) {
+        taskMapper.updateStatus(id, status);
+        log.info("update id={} status for {}", id, status);
+        return true;
     }
 
-    public boolean deleteTasks(int id){
+    public boolean deleteTasks(Long id) {
         log.info("delete id = {}", id);
-        return tasks.removeIf(task -> task.getId() == id);
+        taskMapper.deleteByid(id);
+        return true;
     }
 }

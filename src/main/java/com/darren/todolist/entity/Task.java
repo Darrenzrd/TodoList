@@ -1,14 +1,25 @@
 package com.darren.todolist.entity;
 
+import java.time.LocalDateTime;
+
 public class Task {
 
     private Integer id;
     private String title;
     private TaskStatus taskStatus;
+    private LocalDateTime createtime;
 
     public enum TaskStatus {
         Todo,
         Done
+    }
+
+    public void setCreatetime(LocalDateTime creattime) {
+        this.createtime = creattime;
+    }
+
+    public LocalDateTime getCreatetime() {
+        return createtime;
     }
 
     //实体类的无参构造
@@ -26,7 +37,7 @@ public class Task {
         return taskStatus;
     }
 
-    public void setTaskStatues(TaskStatus taskStatus) {
+    public void setTaskStatus(TaskStatus taskStatus) {
         this.taskStatus = taskStatus;
     }
 

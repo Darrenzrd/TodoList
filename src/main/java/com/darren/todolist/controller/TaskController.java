@@ -21,9 +21,10 @@ public class TaskController {
 
     @PostMapping("/add")
 //    @ResponseBody//如果不写这个,@Controller默认返回视图,需要有.html 页面返回
-    public Task addTask(@RequestParam String title) {
+    public Task addTask(@RequestParam String title,@RequestParam(required = false) Task.TaskStatus status) {
+        if (status == null) status = Task.TaskStatus.Todo;
         log.info("TaskController");
-        return taskService.addTask(title);
+        return taskService.addTask(title,status);
     }
 
     @GetMapping("/list")
@@ -32,12 +33,12 @@ public class TaskController {
     }
 
     @PostMapping("/update")
-    public boolean updateTaskStatus(@RequestParam int id, @RequestParam Task.TaskStatus status) {
+    public boolean updateTaskStatus(@RequestParam Long id, @RequestParam Task.TaskStatus status) {
         return taskService.updateTaskStatus(id, status);
     }
 
     @PostMapping("/delete")
-    public boolean deleteTask(@RequestParam int id){
+    public boolean deleteTask(@RequestParam Long id){
         return taskService.deleteTasks(id);
     }
 }
