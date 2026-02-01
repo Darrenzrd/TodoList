@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TodoList</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+        }
+        h1 {
+            text-align: center;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 8px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        li {
+            margin: 8px 0;
+            padding: 8px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .done {
+            text-decoration: line-through;
+            color: gray;
+        }
+        .actions button {
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>TodoList</h1>
+
+<div>
+    <input type="text" id="taskTitle" placeholder="输入任务标题">
+    <button onclick="addTask()">添加任务</button>
+</div>
+
+<ul id="taskList"></ul>
+
+<script>
+    const baseUrl = 'http://localhost:8080/task';
+
+    // ---------- 获取任务列表 ----------
+    function loadTasks() {
+        fetch(`${baseUrl}/list`)
+            .then(res => res.json())
+            .then(result => {
+                if (!result || result.code !== 0) {
+                    alert(result?.msg || '获取任务失败');
+                    return;
+                }
+                const data = result.data || [];
+                const listEl = document.getElementById('taskList');
+                listEl.innerHTML = '';
+                data.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = task.taskStatus === 'Done' ? 'done' : '';
+                    // 任务标题
+                    const span = document.createElement('span');
+                    span.textContent = task.title;
+                    // 操作按钮
+                    const actions = document.createElement('div');
+                    actions.className = 'actions';
+                    // 切换状态按钮
+                    const toggleBtn = document.createElement('button');
+                    toggleBtn.textContent = task.taskStatus === 'Done' ? '标记为Todo' : '完成';
+                    toggleBtn.onclick = function() {
+                        toggleStatus(task.id, task.taskStatus);
+                    };
+                    // 删除按钮
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = '删除';
+                    delBtn.onclick = function() {
+                        deleteTask(task.id);
+                    };
+                    actions.appendChild(toggleBtn);
+                    actions.appendChild(delBtn);
+                    li.appendChild(span);
+                    li.appendChild(actions);
+                    listEl.appendChild(li);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                alert('获取任务失败');
+            });
+    }
+
+    // ---------- 添加任务 ----------
+    function addTask() {
+        const title = document.getElementById('taskTitle').value.trim();
+        if (!title) return alert('请输入任务标题');
+
+        fetch(`${baseUrl}/add?title=${encodeURIComponent(title)}`, {
+            method: 'POST'
+        })
+            .then(res => res.json())
+            .then(result => {
+                if (!result || result.code !== 0) {
+                    alert(result?.msg || '添加任务失败');
+                    return;
+                }
+                document.getElementById('taskTitle').value = '';
+                loadTasks();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('添加任务失败');
+            });
+    }
+
+    // ---------- 删除任务 ----------
+    function deleteTask(id) {
+        if (!id) return alert('任务ID不存在');
+
+        fetch(`${baseUrl}/delete?id=${id}`, {
+            method: 'POST'
+        })
+            .then(res => res.json())
+            .then(result => {
+                if (!result || result.code !== 0) {
+                    alert(result?.msg || '删除任务失败');
+                    return;
+                }
+                loadTasks();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('删除任务失败');
+            });
+    }
+
+    // ---------- 切换任务状态 ----------
+    function toggleStatus(id, currentStatus) {
+        const newStatus = currentStatus === 'Todo' ? 'Done' : 'Todo';
+
+        fetch(`${baseUrl}/update?id=${id}&status=${newStatus}`, {
+            method: 'POST'
+        })
+            .then(res => res.json())
+            .then(result => {
+                if (!result || result.code !== 0) {
+                    alert(result?.msg || '切换任务状态失败');
+                    return;
+                }
+                loadTasks();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('切换任务状态失败');
+            });
+    }
+
+    // 页面加载时刷新任务列表
+    loadTasks();
+</script>
+
+</body>
+</html>
