@@ -43,10 +43,7 @@ public class TaskController {
 
     @PostMapping("/delete")
     public Result<Void> deleteTask(@RequestParam Long id){
-        boolean ok = taskService.deleteTasks(id);
-        if(!ok){
-            return Result.fail("删除失败");
-        }
+        taskService.deleteTasks(id);
         return Result.success(null);
     }
 }

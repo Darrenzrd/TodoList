@@ -13,6 +13,10 @@ public interface TaskMapper {
     @Select("SELECT * FROM task")
     List<Task> findAll();
 
+    //按照Id搜索任务
+    @Select("SELECT * FROM task WHERE id = #{id}")
+    Task selectById(@Param("id") Long id);
+
     @Update("UPDATE task SET task_status = #{status} WHERE id = #{id}")
     void updateStatus(@Param("id") Long id, @Param("status") Task.TaskStatus status);
 

@@ -59,8 +59,10 @@
 
     // ---------- 获取任务列表 ----------
     function loadTasks() {
-        fetch(`${baseUrl}/list`)
-            .then(res => res.json())
+        fetch(`${baseUrl}/list`) //调用Controller的/list功能
+            .then(function (res) {
+                return res.json();
+            })//括号内等价于res => res.json()
             .then(result => {
                 if (!result || result.code !== 0) {
                     alert(result?.msg || '获取任务失败');

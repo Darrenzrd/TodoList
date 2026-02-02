@@ -1,6 +1,7 @@
 package com.darren.todolist.service;
 
 import com.darren.todolist.entity.Task;
+import com.darren.todolist.exception.BusinessException;
 import com.darren.todolist.mapper.TaskMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,10 @@ public class TaskServiceImpl implements TaskService {
 
     public boolean deleteTasks(Long id) {
         log.info("delete id = {}", id);
+        Task task = taskMapper.selectById(id);
+        if (task == null ){
+            throw new BusinessException("任务不存在,无法删除");
+        }
         taskMapper.deleteByid(id);
         return true;
     }
